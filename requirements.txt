@@ -1,3 +1,4 @@
 click
+toml
 python-dotenv[cli]
 pip-tools
