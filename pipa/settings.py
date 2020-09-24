@@ -17,7 +17,9 @@ class Settings:
 
     @classmethod
     def get(
-        cls, *keys, _item: Any = toml.load(_FILE) if _FILE.exists() else None
+        cls,
+        *keys,
+        _item: Any = toml.load(_FILE) if _FILE.exists() else _DEFAULT_SET
     ) -> Any:
         return (
             cls.get(*keys[1:], _item=_item[keys[0]])
@@ -29,4 +31,6 @@ class Settings:
     def set(cls, *keys: Tuple, val: Any) -> None:
         item: Any = cls.get(*keys[:-1])
         item[keys[-1]] = val
-        toml.dump(cls.get(), cls._FILE.open('w'))
+
+        if cls._FILE.exists():
+            toml.dump(cls.get(), cls._FILE.open('w'))
