@@ -1,9 +1,17 @@
 from typing import Dict, Any, Tuple
 from pathlib import Path
+import platform
 import toml
 
 
+class System:
+    WINDOWS: str = 'Windows'
+    LINUX: str = 'Linux'
+    MACOS: str = 'Darwin'
+
+
 class Settings:
+    SYSTEM: str = platform.system()
     _FILE: Path = Path('pipa.toml')
     _DEFAULT_SET: Dict[str, Any] = {
         'project': {'name': 'pipa'},

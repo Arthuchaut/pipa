@@ -1,15 +1,16 @@
 from __future__ import annotations
 import subprocess
 import sys
-import platform
-from pipa.settings import Settings
+
+# import platform
+from pipa.settings import Settings, System
 
 
 class Shell:
     SHELL: str = (
-        'powershell' if platform.system() == 'Windows' else '/bin/bash'
+        'powershell' if Settings.SYSTEM == System.WINDOWS else '/bin/bash'
     )
-    SEP: str = '; ' if platform.system() == 'Windows' else ' && '
+    SEP: str = '; ' if Settings.SYSTEM == System.WINDOWS else ' && '
 
     def __init__(self):
         self._process: subprocess.Popen = None
