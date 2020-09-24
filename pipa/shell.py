@@ -8,9 +8,10 @@ from pipa.settings import Settings, System
 
 class Shell:
     SHELL: str = (
-        'powershell' if Settings.SYSTEM is System.WINDOWS else '/bin/bash'
+        'powershell'
+        if Settings.get('core', 'system') is System.WINDOWS
+        else '/bin/bash'
     )
-    SEP: str = '; ' if Settings.SYSTEM is System.WINDOWS else ' && '
 
     def __init__(self):
         self._process: subprocess.Popen = None

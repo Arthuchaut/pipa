@@ -1,6 +1,7 @@
 from typing import Dict, Any, Tuple
 from pathlib import Path
 import platform
+import tempfile
 import toml
 
 
@@ -11,12 +12,11 @@ class System:
 
 
 class Settings:
-    SYSTEM: str = platform.system()
     _FILE: Path = Path('pipa.toml')
     _DEFAULT_SET: Dict[str, Any] = {
         'project': {'name': 'pipa'},
-        'env': {'home': 'venv'},
-        'core': {'encoding': 'utf-8'},
+        'venv': {'home': tempfile.gettempdir()},
+        'core': {'system': platform.system(), 'encoding': 'utf-8'},
     }
 
     @classmethod
