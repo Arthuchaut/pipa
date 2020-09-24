@@ -15,9 +15,9 @@ class Settings:
     def init(
         cls,
         settings: Dict[str, Any] = _DEFAULT_SET,
-        project_path: Path = Path('.'),
+        root: Path = Path('.'),
     ) -> str:
-        toml.dump(settings, (project_path / cls._FILE).open('w'))
+        toml.dump(settings, (root / cls._FILE).open('w'))
 
     @classmethod
     def get(
