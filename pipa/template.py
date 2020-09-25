@@ -59,18 +59,7 @@ class TBlueprint:
                                     f'0.0.1 (2020-09-22) : Init file.\n\'\'\'\n\n\nclass '
                                     f'{pname_cls}:\n\t\'\'\'The {pname_cls} '
                                     f'class that is used by the entrypoint file.\'\'\'\n\n\t...\n',
-                                },
-                                {
-                                    'nature': ItemNature.FILE,
-                                    'name': 'main.py',
-                                    'content': f'\'\'\'\n@desc    Main class definition.\n@version 0.0.1\n'
-                                    f'@date    {datetime.now().strftime("%Y-%m-%d")}\n@note    '
-                                    f'0.0.1 ({datetime.now().strftime("%Y-%m-%d")}) : Init file.'
-                                    f'\n\'\'\'\n\n\nclass Main:\n\t\'\'\'The main class that is '
-                                    f'used by the entrypoint file.\'\'\'\n\n\tdef run() -> '
-                                    f'None:\n\t\t\'\'\'The main method that is called first '
-                                    f'by the entrypoint file.\'\'\'\n\n\t\t...\n',
-                                },
+                                }
                             ],
                         },
                         {
@@ -78,8 +67,12 @@ class TBlueprint:
                             'name': '__main__.py',
                             'content': f'\'\'\'\n@desc    Entrypoint file.\n@version 0.0.1\n@date    '
                             f'{datetime.now().strftime("%Y-%m-%d")}\n@note    0.0.1 '
-                            f'({datetime.now().strftime("%Y-%m-%d")}) : Init file.\n\'\'\'\n\n\n'
-                            f'from {pname.lower()}.main import Main\n\nif __name__ == \'__main__\''
+                            f'({datetime.now().strftime("%Y-%m-%d")}) : Init file.'
+                            f'\n\'\'\'\n\n\nclass Main:\n\t\'\'\'The main class that is '
+                            f'used by the entrypoint file.\'\'\'\n\n\tdef run() -> '
+                            f'None:\n\t\t\'\'\'The main method that is called first '
+                            f'by the entrypoint file.\'\'\'\n\n\t\t...\n\n'
+                            f'if __name__ == \'__main__\''
                             f':\n\tMain.run()\n',
                         },
                     ],
@@ -103,7 +96,7 @@ class TBlueprint:
                 {
                     'nature': ItemNature.FILE,
                     'name': '.gitignore',
-                    'content': '# Default ignores\n.vscode/\n__pycache__\nvenv/\n',
+                    'content': f'# Default ignores\n.vscode/\n__pycache__\n{Settings.FILE}',
                 },
             ],
         }
