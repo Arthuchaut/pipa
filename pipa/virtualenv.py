@@ -1,54 +1,44 @@
 from __future__ import annotations
-import random
-import string
-from pathlib import Path
-from pipa.shell import Shell
+from typing import List
+import re
+import sys
+from pipa.shell import Shell, ProcessExecError
 from pipa.settings import Settings, System
 
 
-class RandHash:
+class Virtualenv:
+    _NOTERR: List[str] = ['WARNING: You are using pip version']
+
     @classmethod
-    def gen(self, k: int = 8) -> str:
-        return ''.join(
-            random.choices(string.ascii_letters + string.digits, k=8)
+    def _iserr(cls, err: str) -> bool:
+        return not re.match(
+            r'^' + '|'.join([_.lower() for _ in cls._NOTERR]), err.lower()
         )
 
-
-class Virtualenv:
-    def __init__(self, shell: Shell = Shell()):
-        self._shell: Shell = shell
+    @classmethod
+    def _get_activate_cmd(cls) -> str:
+        return (
+            f'{Settings.get("venv", "home")}\\Scripts\\activate.ps1'
+            if Settings.get('core', 'system') == System.WINDOWS
+            else f'source {Settings.get("venv", "home")}/bin/activate'
+        )
 
     @classmethod
-    def deploy(cls) -> str:
-        vhome: str = Path(Settings.get('venv', 'home'))
-        vname: str = f'{Settings.get("project", "name")}-{RandHash.gen()}'
+    def run(cls, cmd: str) -> Virtualenv:
+        sh: Shell = Shell()
+        sh.write_process(cls._get_activate_cmd())
+        sh.write_process(cmd)
+        sh.write_process('deactivate')
 
-        with Shell() as sh:
-            sh.run(f'python -m venv {str(vhome / vname)}')
+        try:
+            sh.run()
+        except ProcessExecError as e:
+            if cls._iserr(e.__str__()):
+                raise VirtualenvError(e)
 
-        return str(vhome / vname)
+            sys.stdout.write(e.__str__())
 
-    def run(self, cmd: str) -> None:
-        self._shell.run(cmd)
-
-    def activate(self) -> None:
-        cmd: str = f'source {Settings.get("venv", "home")}/bin/activate'
-
-        if Settings.get('core', 'system') == System.WINDOWS:
-            cmd = f'{Settings.get("venv", "home")}/Scripts/activate.ps1'
-
-        self.run(cmd)
-
-    def deactivate(self) -> None:
-        self.run('deactivate')
-
-    def __enter__(self) -> Virtualenv:
-        self.activate()
-        return self
-
-    def __exit__(self, type, value, traceback) -> None:
-        self.deactivate()
-        self._shell.close()
+        return cls
 
 
 class VirtualenvError(Exception):
