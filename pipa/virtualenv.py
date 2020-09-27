@@ -1,5 +1,5 @@
 from __future__ import annotations
-from typing import List
+from typing import List, TextIO
 import re
 import sys
 from pipa.shell import Shell, ProcessExecError
@@ -24,8 +24,9 @@ class Virtualenv:
         )
 
     @classmethod
-    def run(cls, cmd: str) -> Virtualenv:
-        sh: Shell = Shell()
+    def run(cls, cmd: str, quiet: bool = False) -> Virtualenv:
+        stdout: TextIO = Shell.PIPE.SUBPROC if quiet else Shell.PIPE.SYSOUT
+        sh: Shell = Shell(stdout=stdout)
         sh.write_process(cls._get_activate_cmd())
         sh.write_process(cmd)
         sh.write_process('deactivate')
