@@ -36,8 +36,8 @@ class Virtualenv:
         except ProcessExecError as e:
             if cls._iserr(e.__str__()):
                 raise VirtualenvError(e)
-
-            sys.stdout.write(e.__str__())
+            if not quiet:
+                sys.stdout.write(e.__str__())
 
         return cls
 

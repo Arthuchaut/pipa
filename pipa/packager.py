@@ -11,31 +11,46 @@ class Packager:
 
     @classmethod
     def install(
-        cls, *pkgs: Tuple, is_dev: bool = False, root: Path = Path('.')
+        cls,
+        *pkgs: Tuple,
+        is_dev: bool = False,
+        quiet: bool = False,
+        root: Path = Path('.'),
     ) -> None:
         for pkg in pkgs:
-            Virtualenv.run(f'pip install --upgrade {pkg}')
-            cls._register(
+            Virtualenv.run(f'pip install --upgrade {pkg}', quiet=quiet)
+            req_file = (
                 root / cls._REQUIREMENTS_DEV_FILE
                 if is_dev
-                else root / cls._REQUIREMENTS_FILE,
-                pkg,
+                else root / cls._REQUIREMENTS_FILE
             )
+            if not cls._find_in_reqs(pkg, req_file):
+                cls._register(
+                    req_file,
+                    pkg,
+                )
 
     @classmethod
-    def uninstall(cls, *pkgs: Tuple) -> None:
+    def uninstall(cls, *pkgs: Tuple, quiet: bool = False) -> None:
         for pkg in pkgs:
-            if not (req_file := cls._find_in_reqs(pkg)):
+            if not (
+                req_file := cls._find_in_reqs(
+                    pkg, cls._REQUIREMENTS_FILE, cls._REQUIREMENTS_DEV_FILE
+                )
+            ):
                 raise PackagerError(
                     f'Package: {pkg} not found in requirements files.'
                 )
 
-            Virtualenv.run(f'pip uninstall -y {pkg}')
+            Virtualenv.run(f'pip uninstall -y {pkg}', quiet=quiet)
             cls._unregister(req_file, pkg)
 
     @classmethod
-    def _find_in_reqs(cls, pkg: str) -> Path:
-        for req_file in [cls._REQUIREMENTS_FILE, cls._REQUIREMENTS_DEV_FILE]:
+    def _find_in_reqs(cls, pkg: str, *req_files: Tuple) -> Path:
+        for req_file in req_files:
+            if not req_file.exists():
+                raise PackagerError(f'{str(req_file)} doesn\'t exists.')
+
             for line in req_file.read_text(
                 encoding=Settings.get('core', 'encoding')
             ).split('\n'):
@@ -45,8 +60,22 @@ class Packager:
         return None
 
     @classmethod
-    def lock(cls, root: Path = Path('.')) -> None:
-        ...
+    def lock(
+        cls,
+        with_hashes: bool = True,
+        allow_unsafe: bool = True,
+        root: Path = Path('.'),
+    ) -> None:
+        Virtualenv.run(
+            f'python -m piptools compile '
+            f'--upgrade '
+            f'--no-header '
+            f'-q '
+            f'{"--generate-hashes " if with_hashes else ""}'
+            f'{"--allow-unsafe " if allow_unsafe else ""}'
+            f'{str(root / cls._REQUIREMENTS_FILE)} '
+            f'-o {str(root / cls._REQUIREMENTS_LOCK_FILE)}',
+        )
 
     @classmethod
     def _unregister(cls, path: Path, pkg: str) -> None:
