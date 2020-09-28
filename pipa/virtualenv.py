@@ -1,5 +1,6 @@
 from __future__ import annotations
 from typing import List, TextIO
+from pathlib import Path
 import re
 import sys
 from pipa.shell import Shell, ProcessExecError
@@ -8,6 +9,7 @@ from pipa.settings import Settings, System
 
 class Virtualenv:
     _NOTERR: List[str] = ['WARNING: You are using pip version']
+    _ENV_FILE: Path = Path('.env')
 
     @classmethod
     def _iserr(cls, err: str) -> bool:
@@ -24,10 +26,15 @@ class Virtualenv:
         )
 
     @classmethod
-    def run(cls, cmd: str, quiet: bool = False) -> Virtualenv:
+    def run(
+        cls, cmd: str, quiet: bool = False, with_env: bool = False
+    ) -> Virtualenv:
         stdout: TextIO = Shell.PIPE.SUBPROC if quiet else Shell.PIPE.SYSOUT
         sh: Shell = Shell(stdout=stdout)
         sh.write_process(cls._get_activate_cmd())
+        sh.write_process(
+            'dotenv run'
+        ) if cls._ENV_FILE.exists() and with_env else None
         sh.write_process(cmd)
         sh.write_process('deactivate')
 
