@@ -1,4 +1,4 @@
-from typing import Tuple
+from typing import List, Tuple
 from pathlib import Path
 from pipa.virtualenv import Virtualenv, VirtualenvError
 from pipa.settings import Settings
@@ -44,6 +44,20 @@ class Packager:
 
             Virtualenv.run(f'pip uninstall -y {pkg}', quiet=quiet)
             cls._unregister(req_file, pkg)
+
+    @classmethod
+    def req_install(
+        cls, with_dev: bool = True, from_lock: bool = False
+    ) -> None:
+        if from_lock:
+            Virtualenv.run(
+                f'pip install --upgrade -r {str(cls._REQUIREMENTS_LOCK_FILE)}'
+            )
+        else:
+            Virtualenv.run(
+                f'pip install --upgrade -r {str(cls._REQUIREMENTS_FILE)}'
+                f'{" -r " + str(cls._REQUIREMENTS_DEV_FILE) if with_dev else ""}'
+            )
 
     @classmethod
     def _find_in_reqs(cls, pkg: str, *req_files: Tuple) -> Path:

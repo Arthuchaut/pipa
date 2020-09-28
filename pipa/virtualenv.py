@@ -1,14 +1,19 @@
 from __future__ import annotations
-from typing import List, TextIO
-from pathlib import Path
+
 import re
 import sys
-from pipa.shell import Shell, ProcessExecError
+from pathlib import Path
+from typing import List, TextIO
+
 from pipa.settings import Settings, System
+from pipa.shell import ProcessExecError, Shell
 
 
 class Virtualenv:
-    _NOTERR: List[str] = ['WARNING: You are using pip version']
+    _NOTERR: List[str] = [
+        'WARNING: You are using pip version',  # Raised by the pip command
+        'The generated requirements file may be rejected by pip install',  # Raised by pip-tools when trying to lock unsafe dependencies
+    ]
     _ENV_FILE: Path = Path('.env')
 
     @classmethod
