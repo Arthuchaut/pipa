@@ -27,8 +27,8 @@ class Pipa:
         Virtualenv.deploy()
 
     @classmethod
-    def init_settings(cls) -> None:
-        Settings.init(root=Settings.get('project', 'name'))
+    def init_settings(cls, root: str = None) -> None:
+        Settings.init(root=root or Settings.get('project', 'name'))
 
     @classmethod
     def init_requirements(cls) -> None:
@@ -58,6 +58,12 @@ class Pipa:
     @classmethod
     def run(cls, cmd: str) -> None:
         Virtualenv.run(cmd, with_env=True)
+
+    @classmethod
+    def req_install(
+        cls, with_dev: bool = True, from_lock: bool = False
+    ) -> None:
+        Packager.req_install(with_dev=with_dev, from_lock=from_lock)
 
     @classmethod
     def install(
