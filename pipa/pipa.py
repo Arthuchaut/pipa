@@ -46,6 +46,12 @@ class Pipa:
                 )
 
     @classmethod
+    def init_git(cls) -> None:
+        Virtualenv.run(
+            f'git init {Settings.get("project", "name")}', quiet=True
+        )
+
+    @classmethod
     def run(cls, cmd: str) -> None:
         Virtualenv.run(cmd, with_env=True)
 
