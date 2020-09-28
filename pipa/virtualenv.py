@@ -2,6 +2,8 @@ from __future__ import annotations
 
 import re
 import sys
+import random
+import string
 from pathlib import Path
 from typing import List, TextIO
 
@@ -23,12 +25,24 @@ class Virtualenv:
         )
 
     @classmethod
+    def gen_hash(cls, k: int = 8) -> str:
+        return ''.join(
+            random.choices(string.ascii_letters + string.digits, k=8)
+        )
+
+    @classmethod
     def _get_activate_cmd(cls) -> str:
         return (
             f'{Settings.get("venv", "home")}\\Scripts\\activate.ps1'
             if Settings.get('core', 'system') == System.WINDOWS
             else f'source {Settings.get("venv", "home")}/bin/activate'
         )
+
+    @classmethod
+    def deploy(cls) -> None:
+        sh: Shell = Shell(stdout=Shell.PIPE.SUBPROC)
+        sh.write_process(f'python -m venv {str(Settings.get("venv", "home"))}')
+        sh.run()
 
     @classmethod
     def run(

@@ -7,8 +7,12 @@ from pipa.settings import Settings
 class Template:
     _ENCODING: str = 'utf-8'
 
-    def __init__(self, pname: str, wkdir: Path = Path('.')):
-        self._pname: str = pname
+    def __init__(
+        self,
+        pname: str = None,
+        wkdir: Path = Path('.'),
+    ):
+        self._pname: str = pname or Settings.get('project', 'name')
         self._wkdir: Path = wkdir
 
     def deploy(self) -> None:

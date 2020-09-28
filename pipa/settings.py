@@ -14,7 +14,7 @@ class System:
 class Settings:
     FILE: Path = Path('.pipa.toml')
     _DEFAULT_SET: Dict[str, Any] = {
-        'project': {'name': 'pipa'},
+        'project': {'name': None},
         'venv': {'home': tempfile.gettempdir()},
         'core': {'system': platform.system(), 'encoding': 'utf-8'},
     }
