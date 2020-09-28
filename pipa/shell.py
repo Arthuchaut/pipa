@@ -14,6 +14,16 @@ class _Pipe:
 
 class Shell:
     PIPE: _Pipe = _Pipe
+    SHEXE: str = (
+        'powershell '
+        if Settings.get('core', 'system') == System.WINDOWS
+        else '/bin/bash '
+    )
+    SEP: str = (
+        '; '
+        if Settings.get('core', 'system') == System.WINDOWS
+        else ' && '
+    )
 
     def __init__(self, stdout: TextIO = PIPE.SYSOUT):
         self._processes: List[str] = []
@@ -22,24 +32,8 @@ class Shell:
         self._stderr: TextIO = self.PIPE.SUBPROC
 
     @property
-    def _shexe(self) -> str:
-        return (
-            'powershell '
-            if Settings.get('core', 'system') == System.WINDOWS
-            else '/bin/bash '
-        )
-
-    @property
-    def _sep(self) -> str:
-        return (
-            '; '
-            if Settings.get('core', 'system') == System.WINDOWS
-            else ' && '
-        )
-
-    @property
     def _cmd(self) -> str:
-        return self._shexe + self._sep.join(self._processes)
+        return self.SHEXE + self.SEP.join(self._processes)
 
     def write_process(self, cmd: str) -> Shell:
         self._processes += [cmd]

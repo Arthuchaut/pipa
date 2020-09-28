@@ -5,7 +5,7 @@ import sys
 import random
 import string
 from pathlib import Path
-from typing import List, TextIO
+from typing import List, TextIO, Tuple
 
 from pipa.settings import Settings, System
 from pipa.shell import ProcessExecError, Shell
@@ -43,6 +43,13 @@ class Virtualenv:
         sh: Shell = Shell(stdout=Shell.PIPE.SUBPROC)
         sh.write_process(f'python -m venv {str(Settings.get("venv", "home"))}')
         sh.run()
+
+    @classmethod
+    def runs(
+        cls, *cmds: Tuple, quiet: bool = False, with_env: bool = False
+    ) -> Virtualenv:
+        cmd: str = Shell.SEP.join(cmds)
+        cls.run(cmd, quiet=quiet, with_env=with_env)
 
     @classmethod
     def run(
