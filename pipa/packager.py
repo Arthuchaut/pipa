@@ -63,7 +63,7 @@ class Packager:
     def _find_in_reqs(cls, pkg: str, *req_files: Tuple) -> Path:
         for req_file in req_files:
             if not req_file.exists():
-                raise PackagerError(f'{str(req_file)} doesn\'t exists.')
+                continue
 
             for line in req_file.read_text(
                 encoding=Settings.get('core', 'encoding')
