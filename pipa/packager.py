@@ -5,9 +5,9 @@ from pipa.settings import Settings
 
 
 class Packager:
-    _REQUIREMENTS_FILE: Path = Path('requirements.txt')
-    _REQUIREMENTS_DEV_FILE: Path = Path('requirements-dev.txt')
-    _REQUIREMENTS_LOCK_FILE: Path = Path('requirements.lock')
+    REQUIREMENTS_FILE: Path = Path('requirements.txt')
+    REQUIREMENTS_DEV_FILE: Path = Path('requirements-dev.txt')
+    REQUIREMENTS_LOCK_FILE: Path = Path('requirements.lock')
 
     @classmethod
     def install(
@@ -20,9 +20,9 @@ class Packager:
         for pkg in pkgs:
             Virtualenv.run(f'pip install --upgrade {pkg}', quiet=quiet)
             req_file = (
-                root / cls._REQUIREMENTS_DEV_FILE
+                root / cls.REQUIREMENTS_DEV_FILE
                 if is_dev
-                else root / cls._REQUIREMENTS_FILE
+                else root / cls.REQUIREMENTS_FILE
             )
             if not cls._find_in_reqs(pkg, req_file):
                 cls._register(
@@ -35,7 +35,7 @@ class Packager:
         for pkg in pkgs:
             if not (
                 req_file := cls._find_in_reqs(
-                    pkg, cls._REQUIREMENTS_FILE, cls._REQUIREMENTS_DEV_FILE
+                    pkg, cls.REQUIREMENTS_FILE, cls.REQUIREMENTS_DEV_FILE
                 )
             ):
                 raise PackagerError(
@@ -47,17 +47,35 @@ class Packager:
 
     @classmethod
     def req_install(
-        cls, with_dev: bool = True, from_lock: bool = False
-    ) -> None:
+        cls, dev: bool = False, from_lock: bool = False, quiet: bool = True
+    ) -> bool:
         if from_lock:
+            if not cls.REQUIREMENTS_LOCK_FILE.exists():
+                return False
+
             Virtualenv.run(
-                f'pip install --upgrade -r {str(cls._REQUIREMENTS_LOCK_FILE)}'
+                f'pip install --upgrade -r {str(cls.REQUIREMENTS_LOCK_FILE)}',
+                quiet=quiet,
             )
         else:
-            Virtualenv.run(
-                f'pip install --upgrade -r {str(cls._REQUIREMENTS_FILE)}'
-                f'{" -r " + str(cls._REQUIREMENTS_DEV_FILE) if with_dev else ""}'
-            )
+            if not dev:
+                if not cls.REQUIREMENTS_FILE.exists():
+                    return False
+
+                Virtualenv.run(
+                    f'pip install --upgrade -r {str(cls.REQUIREMENTS_FILE)}',
+                    quiet=quiet,
+                )
+            else:
+                if not cls.REQUIREMENTS_DEV_FILE.exists():
+                    return False
+
+                Virtualenv.run(
+                    f'pip install --upgrade -r {str(cls.REQUIREMENTS_DEV_FILE)}',
+                    quiet=quiet,
+                )
+
+        return True
 
     @classmethod
     def _find_in_reqs(cls, pkg: str, *req_files: Tuple) -> Path:
@@ -87,8 +105,8 @@ class Packager:
             f'-q '
             f'{"--generate-hashes " if with_hashes else ""}'
             f'{"--allow-unsafe " if allow_unsafe else ""}'
-            f'{str(root / cls._REQUIREMENTS_FILE)} '
-            f'-o {str(root / cls._REQUIREMENTS_LOCK_FILE)}',
+            f'{str(root / cls.REQUIREMENTS_FILE)} '
+            f'-o {str(root / cls.REQUIREMENTS_LOCK_FILE)}',
         )
 
     @classmethod

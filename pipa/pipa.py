@@ -1,4 +1,5 @@
 from pathlib import Path
+import sys
 from typing import Dict, List
 from pipa.virtualenv import Virtualenv
 from pipa.template import Template
@@ -7,7 +8,9 @@ from pipa.settings import Settings
 
 
 class Pipa:
-    _BASIC_PACKAGES: Dict[str, List[str]] = {'dev': ['pytest', 'black']}
+    _BASIC_PACKAGES: Dict[str, List[str]] = {
+        'dev': ['pytest', 'black', 'pip-tools', 'python-dotenv[cli]']
+    }
 
     @classmethod
     def init_template(cls, pname: str) -> None:
@@ -27,11 +30,11 @@ class Pipa:
         Virtualenv.deploy()
 
     @classmethod
-    def init_settings(cls, root: str = None) -> None:
-        Settings.init(root=root or Settings.get('project', 'name'))
+    def init_settings(cls, root: Path = None) -> None:
+        Settings.init(root=root or Path(Settings.get('project', 'name')))
 
     @classmethod
-    def init_requirements(cls) -> None:
+    def init_requirements(cls, root: Path = None) -> None:
         is_dev: bool = False
 
         for env, pkgs in cls._BASIC_PACKAGES.items():
@@ -42,7 +45,7 @@ class Pipa:
                 cls.install(
                     pkg,
                     is_dev=is_dev,
-                    root=Path(Settings.get('project', 'name')),
+                    root=root or Path(Settings.get('project', 'name')),
                 )
 
     @classmethod
@@ -60,10 +63,8 @@ class Pipa:
         Virtualenv.run(cmd, with_env=True)
 
     @classmethod
-    def req_install(
-        cls, with_dev: bool = True, from_lock: bool = False
-    ) -> None:
-        Packager.req_install(with_dev=with_dev, from_lock=from_lock)
+    def req_install(cls, dev: bool = False, from_lock: bool = False) -> bool:
+        return Packager.req_install(dev=dev, from_lock=from_lock)
 
     @classmethod
     def install(
@@ -82,3 +83,7 @@ class Pipa:
     @classmethod
     def lock(cls) -> None:
         Packager.lock(allow_unsafe=False)
+
+    @classmethod
+    def abort(cld) -> None:
+        sys.exit(1)
