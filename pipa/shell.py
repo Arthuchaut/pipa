@@ -53,10 +53,10 @@ class Shell:
             stderr=self._stderr,
         )
 
-        if err := process.communicate()[1] \
+        if stderr := process.communicate()[1] \
         .decode(Settings.get('core', 'encoding')) \
         .strip():
-            raise ProcessExecError(err)
+            raise ProcessExecError(stderr)
 
         return process.returncode
 
