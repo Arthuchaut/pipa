@@ -2,7 +2,6 @@ from pathlib import Path
 from pipa.packager import Packager
 from typing import List, Set
 import click
-
 from pipa.pipa import Pipa
 from pipa.settings import Settings
 
@@ -116,12 +115,23 @@ class Main:
     )
     @click.argument('cmd', required=True, nargs=-1, type=str)
     def exec(cmd: List[str]) -> None:
+        if not Settings.FILE.exists():
+            return click.secho(
+                f'You are not in a Pipa project. Command aborted.',
+                err=True,
+                fg=Main._ERR_COLOR,
+            )
+
         click.secho(
             f'Running in {Path(Settings.get("venv", "home")).name} '
             f'environment...',
             fg=Main._INFO_COLOR,
         )
-        Pipa.run(' '.join(cmd))
+
+        try:
+            Pipa.run(' '.join(cmd))
+        except Exception as e:
+            click.secho(e.__str__(), err=True, fg=Main._ERR_COLOR, bold=True)
 
     def _init(nolock: bool = True, dev: bool = False) -> None:
         # If not, consider that the project has not been initialized.
@@ -166,4 +176,7 @@ class Main:
 
 
 if __name__ == '__main__':
+    import sys
+
+    sys.argv[0] = 'python -m pipa'
     Main.run()
