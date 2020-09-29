@@ -19,12 +19,6 @@ class Main:
 
     @run.command(help='Create a new project.')
     @click.argument('name', required=True, nargs=1, type=str)
-    @click.option(
-        '--install',
-        '-i',
-        type=str,
-        help='The package to install in the main requirements (can be specified many times).',
-    )
     def new(name: str, install: str) -> None:
         try:
             click.secho('Deploying template...', fg=Main._INFO_COLOR)
@@ -93,8 +87,9 @@ class Main:
                 click.secho(f'Installing {pkg}...', fg=Main._INFO_COLOR)
                 Pipa.install(pkg, is_dev=dev)
 
-            click.secho('Locking dependencies...', fg=Main._INFO_COLOR)
-            Pipa.lock()
+            if not dev:
+                click.secho('Locking dependencies...', fg=Main._INFO_COLOR)
+                Pipa.lock()
         except Exception as e:
             click.secho(e.__str__(), err=True, fg=Main._ERR_COLOR, bold=True)
 

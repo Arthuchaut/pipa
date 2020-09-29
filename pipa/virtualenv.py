@@ -59,9 +59,9 @@ class Virtualenv:
         sh: Shell = Shell(stdout=stdout)
         sh.write_process(cls._get_activate_cmd())
         sh.write_process(
-            'dotenv run'
-        ) if cls._ENV_FILE.exists() and with_env else None
-        sh.write_process(cmd)
+            ('dotenv run ' if cls._ENV_FILE.exists() and with_env else '')
+            + cmd
+        )
         sh.write_process('deactivate')
 
         try:
